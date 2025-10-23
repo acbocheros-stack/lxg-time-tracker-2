@@ -1,6 +1,3 @@
-// ============================================
-// ARCHIVO 1: package.json
-// ============================================
 {
   "name": "lxg-time-tracker",
   "version": "1.0.0",
@@ -36,3 +33,25 @@
     ]
   }
 }
+```
+
+## 🔧 **Solución 3: Configurar en el Dashboard de Vercel**
+
+Ve a tu proyecto en Vercel → **Settings** → **General**:
+
+1. **Build Command:** `npm run build`
+2. **Output Directory:** `build`
+3. **Install Command:** `npm install` (o déjalo en automático)
+
+## 🔧 **Solución 4: Verificar estructura de archivos**
+
+Asegúrate de que tu repositorio tenga esta estructura:
+```
+lxg-time-tracker-2/
+├── public/
+│   └── index.html
+├── src/
+│   ├── App.js
+│   └── index.js
+├── package.json
+└── vercel.json
