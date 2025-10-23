@@ -1,6 +1,3 @@
-// ============================================
-// ARCHIVO 4: src/App.js
-// ============================================
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, BarChart3, Plus, Trash2, LogOut, Download, AlertCircle, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
@@ -102,7 +99,15 @@ const Login = ({ setUser, users, loadData }) => {
 };
 
 const Main = ({ user, setUser, users, projects, entries, tab, setTab, loadData }) => {
-  const getWeek = () => { const d = new Date(); const start = new Date(d.getFullYear(), 0, 1); const diff = d - start; const oneWeek = 1000 * 60 * 60 * 24 * 7; const weekNum = Math.ceil(diff / oneWeek); return `${d.getFullYear()}-W${String(weekNum).padStart(2, '0')}`; };
+  const getWeek = () => { 
+    const d = new Date(); 
+    const start = new Date(d.getFullYear(), 0, 1); 
+    const diff = d - start; 
+    const oneWeek = 1000 * 60 * 60 * 24 * 7; 
+    const weekNum = Math.ceil(diff / oneWeek); 
+    return `${d.getFullYear()}-W${String(weekNum).padStart(2, '0')}`; 
+  };
+  
   const [week, setWeek] = useState(getWeek());
   const [proj, setProj] = useState('');
   const [hrs, setHrs] = useState('');
@@ -136,7 +141,9 @@ const Main = ({ user, setUser, users, projects, entries, tab, setTab, loadData }
     
     await supabase.from('entries').insert([newEntry]);
     await loadData();
-    setProj(''); setHrs(''); setDesc('');
+    setProj(''); 
+    setHrs(''); 
+    setDesc('');
     if (status === 'pending') alert('Excede 70h, requiere aprobación');
   };
 
@@ -218,7 +225,19 @@ const Main = ({ user, setUser, users, projects, entries, tab, setTab, loadData }
 
   const exp = () => {
     const data = user.is_admin ? filtered : myEntries;
-    const csv = [['Semana', 'Usuario', 'Email', 'Proyecto', 'Horas', 'Desc', 'Estado'], ...data.map(e => [e.week, e.user_name, e.user_email, e.project_name || 'N/A', e.hours, e.description || '', e.status === 'approved' ? 'Aprobado' : e.status === 'pending' ? 'Pendiente' : 'Rechazado'])].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const csv = [
+      ['Semana', 'Usuario', 'Email', 'Proyecto', 'Horas', 'Desc', 'Estado'], 
+      ...data.map(e => [
+        e.week, 
+        e.user_name, 
+        e.user_email, 
+        e.project_name || 'N/A', 
+        e.hours, 
+        e.description || '', 
+        e.status === 'approved' ? 'Aprobado' : e.status === 'pending' ? 'Pendiente' : 'Rechazado'
+      ])
+    ].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -385,50 +404,4 @@ const Main = ({ user, setUser, users, projects, entries, tab, setTab, loadData }
                 <h2 className="text-xl font-bold">Todos los Registros</h2>
                 <div className="flex gap-2 flex-wrap">
                   <select value={fProj} onChange={e => setFProj(e.target.value)} className="px-3 py-2 border rounded-lg text-sm"><option value="all">Todos</option>{projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select>
-                  <select value={fUser} onChange={e => setFUser(e.target.value)} className="px-3 py-2 border rounded-lg text-sm"><option value="all">Todos</option>{users.map(u => <option key={u.email} value={u.email}>{u.name}</option>)}</select>
-                  <select value={fStat} onChange={e => setFStat(e.target.value)} className="px-3 py-2 border rounded-lg text-sm"><option value="all">Todos</option><option value="approved">Aprobados</option><option value="pending">Pendientes</option><option value="rejected">Rechazados</option></select>
-                  <button onClick={exp} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm"><Download className="w-4 h-4 inline" /></button>
-                </div>
-              </div>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {filtered.map(e => (
-                  <div key={e.id} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="font-semibold text-sm">{e.user_name} • {e.project_name}</div>
-                        <div className="text-xs text-gray-600">{e.week} • {e.hours}h • {e.status === 'approved' ? '✓' : e.status === 'pending' ? '⏳' : '✗'}</div>
-                      </div>
-                      <button onClick={() => delEntry(e.id)} className="p-1 text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4" /></button>
-                    </div>
-                  </div>
-                ))}
-                {!filtered.length && <div className="text-center py-12 text-gray-400">No hay registros</div>}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {tab === 'projects' && user.is_admin && (
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-xl font-bold mb-4">Gestión de Proyectos</h2>
-            <div className="flex gap-2 mb-6">
-              <input type="text" value={newProj} onChange={e => setNewProj(e.target.value)} onKeyPress={e => e.key === 'Enter' && addProj()} placeholder="Nuevo proyecto..." className="flex-1 px-4 py-2 border-2 rounded-lg" />
-              <button onClick={addProj} disabled={!newProj.trim()} className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-semibold disabled:opacity-50"><Plus className="w-4 h-4 inline mr-1" />Agregar</button>
-            </div>
-            {projects.length === 0 && <div className="text-center py-12 text-gray-400"><Users className="w-16 h-16 mx-auto mb-3 opacity-50" /><p className="text-lg font-semibold mb-1">No hay proyectos</p><p className="text-sm">Crea tu primer proyecto arriba</p></div>}
-            <div className="space-y-2">
-              {projects.map(p => (
-                <div key={p.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
-                  <div className="font-semibold">{p.name}</div>
-                  <button onClick={() => delProj(p.id)} className="p-2 text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default App;
+                  <select value={fUser} onChange={e => setFUser(e.target.value)} className="px-3 py-2 border rounded-lg text-sm"><option value="all">Todos</option>{users.map(u => <option key={u.email} value={u.email}
